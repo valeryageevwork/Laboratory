@@ -24,8 +24,70 @@ namespace UserInterfaceWPF
                 {
                     textBoxInformation.Clear();
                     textBlockTask.Text = "";
+
+                    List<List<double>> list = GetValuesInTable(nums, "DOL", "EUR");
+
+                    textBlockTask.Text += "Dollar: ";
+                    List<double> minusDollar = MinMaxRubles(true, list);
+
+                    textBlockTask.Text += "Euro: ";
+                    List<double> minusEuro = MinMaxRubles(false, list);
+
+                    double[] dataX = new double[minusDollar.Count];
+                    for (int i = 0; i < minusDollar.Count; i++)
+                    {
+                        dataX[i] = i + 2;
+                    }
+
+                    double[] dataY = minusDollar.ToArray();
+
+                    WpfPlotRussiaRubles.Plot.Clear();
+                    WpfPlotRussiaRubles.Plot.AddScatter(dataX, dataY);
+                    WpfPlotRussiaRubles.Plot.Title($"Scatter Plot of rubles and the other");
+                    WpfPlotRussiaRubles.Plot.XLabel("Days");
+                    WpfPlotRussiaRubles.Plot.YLabel("Changes");
+                    WpfPlotRussiaRubles.Refresh();
                 }
             }
+        }
+
+        private List<double> MinMaxRubles(bool dolOrEur, List<List<double>> list)
+        {
+            List<double> newList = new List<double>();
+            foreach (var el in list)
+            {
+                if (dolOrEur)
+                {
+                    newList.Add(el[0]);
+                }
+                else
+                {
+                    newList.Add(el[1]);
+                }
+            }
+
+            List<double> minusList = new List<double>();
+            for (int i = 0; i < newList.Count - 1; i++)
+            {
+                var temp = newList[i + 1] - newList[i];
+                minusList.Add(temp);
+            }
+
+            List<double> temps = new List<double>(minusList);
+            temps.Sort();
+
+            int min_day, max_day;
+            double min, max;
+
+            min_day = minusList.FindIndex(el => el == temps[0]) + 2;
+            min = temps[0];
+
+            max_day = minusList.FindIndex(el => el == temps[temps.Count - 1]) + 2;
+            max = temps[temps.Count - 1];
+
+            textBlockTask.Text += $"\nDay max = {max_day}, max = {max}\nDay min = {min_day}, min = {min} \n\n";
+
+            return minusList;
         }
 
         private void shelepkoButton_Click(object sender, RoutedEventArgs e)
