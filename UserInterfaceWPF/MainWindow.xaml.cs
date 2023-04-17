@@ -37,8 +37,50 @@ namespace UserInterfaceWPF
                     {
                         textBoxInformation.Clear();
                         textBlockTask.Text = "";
+                        
+                        List<List<double>> list = GetValuesInTable(nums, "YEAR", "PEOPLE");
+                        textBlockTask.Text += "Procent:";
+                        List<double> minusList = ProcentPeople(list);
+
+                        List<double> newListX = new List<double>();
+                        List<double> newListY = new List<double>();
+                        foreach (var el in list)
+                        {
+                            newListX.Add(el[0]);
+                            newListY.Add(el[1]);
+                        }
+                        double[] dataX = newListX.ToArray();
+                        double[] dataY = newListY.ToArray();
+
+                        WpfPlotRussiaRubles.Plot.AddScatter(dataX, dataY);
+                        WpfPlotRussiaRubles.Refresh();
                     }
                 }
+        }
+
+        private List<double> ProcentPeople(List<List<double>> list)
+        {
+            List<double> newList = new List<double>();
+            foreach (var el in list)
+            {
+                newList.Add(el[1]);
+            }
+
+            List<double> minusList = new List<double>();
+            for (int i = 0; i < newList.Count - 1; i++)
+            {
+                var temp = newList[i + 1] - newList[i];
+                temp /= newList[i];
+                temp *= 100;
+                minusList.Add(temp);
+            }
+            textBlockTask.Text += "\n";
+            for (int i = 0; i < minusList.Count; i++)
+            {
+                textBlockTask.Text += minusList[i].ToString() + "\n";
+            }
+
+            return minusList;
         }
 
         private double[] GetFromFile(string path)
